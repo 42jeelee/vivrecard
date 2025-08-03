@@ -1,0 +1,3 @@
+[submodule "kiwee"]
+	path = kiwee
+	url = https://github.com/42jeelee/kiwee.git
