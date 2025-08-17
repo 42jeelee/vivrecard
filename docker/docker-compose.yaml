@@ -17,8 +17,22 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     depends_on:
       - app
-    networks:
       - frontend
+    networks:
+      - frontend-network
+    <<: *korea-timezone
+
+  frontend:
+    build:
+      context: ../vivrecard
+      dockerfile: Dockerfile
+    container_name: kiwee-frontend
+    expose:
+      - "80"
+    depends_on:
+      - app
+    networks:
+      - frontend-network
     <<: *korea-timezone
 
   app:
@@ -26,8 +40,8 @@ services:
       context: ../kiwee
       dockerfile: Dockerfile
     container_name: kiwee-app
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       REDIS_HOST: ${REDIS_HOST}
@@ -41,14 +55,15 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL}
     depends_on:
       redis:
         condition: service_healthy
       db:
         condition: service_healthy
     networks:
-      - frontend
-      - backend
+      - frontend-network
+      - backend-network
     <<: *korea-timezone
 
   redis:
@@ -64,7 +79,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - backend
+      - backend-network
     <<: *korea-timezone
 
   db:
@@ -86,7 +101,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - backend
+      - backend-network
     <<: *korea-timezone
 
   certbot:
@@ -102,5 +117,5 @@ volumes:
   db_data:
 
 networks:
-  frontend:
-  backend:
+  frontend-network:
+  backend-network:
